@@ -1,9 +1,3 @@
-"""
-TechCart - Electronics Recommendation Demo
-Loads the trained models from Notebook 2 (TF-IDF, SVD/KNN, Hybrid, LightGCN)
-and serves a small e-commerce style site that demonstrates all four.
-"""
-
 import os
 import pickle
 
@@ -16,12 +10,8 @@ MODELS_DIR = os.path.join(BASE_DIR, "saved_models")
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
 app = Flask(__name__)
-app.secret_key = "techcart-dev-secret"  # fine for a local demo, change if you deploy this for real
+app.secret_key = "smartreco-dev-secret" 
 
-
-# ---------------------------------------------------------------------------
-# Load data + models once at startup
-# ---------------------------------------------------------------------------
 
 def _load_pickle(name):
     path = os.path.join(MODELS_DIR, name)
@@ -45,10 +35,6 @@ hybrid_artifacts = _load_pickle("hybrid_artifacts.pkl")
 candidate_items = hybrid_artifacts["candidate_items"]
 candidate_item_tfidf = hybrid_artifacts["candidate_item_tfidf"]
 asin_to_idx = hybrid_artifacts["asin_to_idx"]
-best_cf_model_name = hybrid_artifacts["best_cf_model_name"]
-
-print("Loading best Collaborative Filtering model (%s) ..." % best_cf_model_name)
-best_cf_model = _load_pickle("best_cf_model.pkl")
 
 print("Loading LightGCN artifacts ...")
 lightgcn = _load_pickle("lightgcn_artifacts.pkl")
@@ -61,14 +47,10 @@ lgcn_items = lightgcn["lgcn_items"]
 print("Loading demo shopper profiles ...")
 demo_users = _load_pickle("demo_users.pkl")
 
-print("TechCart is ready. %d products loaded, %d demo shoppers available." % (
+print("SmartReco is ready. %d products loaded, %d demo shoppers available." % (
     len(products_df), len(demo_users)
 ))
 
-
-# ---------------------------------------------------------------------------
-# Recommendation helpers (same logic as Notebook 2)
-# ---------------------------------------------------------------------------
 
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -210,19 +192,6 @@ def lightgcn_recommend(user_id, top_n=10):
     return results
 
 
-def predicted_rating(user_id, asin):
-    if not user_id:
-        return None
-    try:
-        return round(best_cf_model.predict(user_id, asin).est, 2)
-    except Exception:
-        return None
-
-
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
-
 @app.route("/")
 def dashboard():
     shopper_id = get_current_shopper()
@@ -238,7 +207,6 @@ def dashboard():
         for row, score in h_results:
             d = row.to_dict()
             d["score"] = f"{score*100:.1f}%"
-            d["predicted_rating"] = predicted_rating(shopper_id, d["asin"])
             hybrid_recs.append(d)
 
         lgcn_results = lightgcn_recommend(shopper_id, top_n=12)
@@ -246,7 +214,6 @@ def dashboard():
         for row, score in lgcn_results:
             d = row.to_dict()
             d["score"] = f"{score:.3f}"
-            d["predicted_rating"] = predicted_rating(shopper_id, d["asin"])
             lightgcn_recs.append(d)
 
         history = shopper_history(shopper_id)
@@ -341,18 +308,11 @@ def recommendations(asin):
         recs.append(d)
 
     shopper_id = get_current_shopper()
-    my_rating = predicted_rating(shopper_id, asin) if shopper_id else None
-
-    # Get CF predicted ratings for similar items
-    for r in recs:
-        r["predicted_rating"] = predicted_rating(shopper_id, r["asin"]) if shopper_id else None
 
     return render_template(
         "recommendation.html",
         product=product,
         recommendations=recs,
-        my_rating=my_rating,
-        cf_model_name=best_cf_model_name,
         alpha=0.5
     )
 
