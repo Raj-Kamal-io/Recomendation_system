@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartReco - Discover Products{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Hero Banner Section -->
+    <div class="hero-banner">
+        <div class="hero-decor-1"></div>
+        <div class="hero-decor-2"></div>
+
+        <div class="hero-content">
+            <h1 class="hero-title">Discover Products <br>You'll <span>Love </span></h1>
+            <p class="hero-subtitle">
+                AI-powered recommendations tailored to your preferences and shopping behavior.
+            </p>
+            <div class="hero-actions">
+                <a href="{{ url_for('search') }}" class="btn-primary-rect">
+                    Get Recommendations
+                </a>
+                <a href="#categories-section" class="btn-secondary-rect">
+                    <i class="fas fa-th-large"></i> Explore Categories
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-visuals">
+            <img src="{{ url_for('static', filename='img/hero_mockup2.png') }}" class="hero-main-img"
+                alt="SmartReco Shop Mockup">
+        </div>
+    </div>
+
+    <!-- Shop by Categories Section -->
+    <section id="categories-section" class="mb-5">
+        <div class="section-header">
+            <h2 class="section-title">Shop by Categories</h2>
+            <a href="{{ url_for('search') }}" class="section-link">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="categories-grid">
+            <!-- Electronics -->
+            <div class="category-card" data-cat="Electronics"
+                onclick="window.location.href=`{{ url_for('search', category='Electronics') }}`">
+                <div class="category-icon-container">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <div class="category-info">
+                    <span class="category-name">Electronics</span>
+                    <span class="category-count">2,456 items</span>
+                </div>
+            </div>
+
+            <!-- Fashion -->
+            <div class="category-card" data-cat="Fashion"
+                onclick="window.location.href=`{{ url_for('search', category='Clothing') }}`">
+                <div class="category-icon-container">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <div class="category-info">
+                    <span class="category-name">Fashion</span>
+                    <span class="category-count">3,128 items</span>
+                </div>
+            </div>
+
+            <!-- Home & Kitchen -->
+            <div class="category-card" data-cat="Home"
+                onclick="window.location.href=`{{ url_for('search', category='Home') }}`">
+                <div class="category-icon-container">
+                    <i class="fas fa-blender"></i>
+                </div>
+                <div class="category-info">
+                    <span class="category-name">Home & Kitchen</span>
+                    <span class="category-count">2,789 items</span>
+                </div>
+            </div>
+
+            <!-- Beauty -->
+            <div class="category-card" data-cat="Beauty"
+                onclick="window.location.href=`{{ url_for('search', category='Care') }}`">
+                <div class="category-icon-container">
+                    <i class="fas fa-spray-can"></i>
+                </div>
+                <div class="category-info">
+                    <span class="category-name">Beauty</span>
+                    <span class="category-count">1,842 items</span>
+                </div>
+            </div>
+
+            <!-- Books -->
+            <div class="category-card" data-cat="Books"
+                onclick="window.location.href=`{{ url_for('search', category='Book') }}`">
+                <div class="category-icon-container">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <div class="category-info">
+                    <span class="category-name">Books</span>
+                    <span class="category-count">1,238 items</span>
+                </div>
+            </div>
+
+            <!-- Sports -->
+            <div class="category-card" data-cat="Sports"
+                onclick="window.location.href=`{{ url_for('search', category='Sports') }}`">
+                <div class="category-icon-container">
+                    <i class="fas fa-basketball-ball"></i>
+                </div>
+                <div class="category-info">
+                    <span class="category-name">Sports</span>
+                    <span class="category-count">1,056 items</span>
+                </div>
+            </div>
+
+            <!-- Toys & Games -->
+            <div class="category-card" data-cat="Toys"
+                onclick="window.location.href=`{{ url_for('search', category='Toys') }}`">
+                <div class="category-icon-container">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <div class="category-info">
+                    <span class="category-name">Toys & Games</span>
+                    <span class="category-count">932 items</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Personalized Shopper Sections -->
+    {% if shopper_id %}
+    <!-- Shopper Welcome Banner -->
+    <div class="dashboard-card mb-5" style="background: linear-gradient(135deg, rgba(108, 76, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%); border: 1px solid rgba(108, 76, 241, 0.15);">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div>
+                <h4 class="fw-bold mb-1 text-dark-mode-override">Welcome Back, Shopper <span class="text-primary font-monospace">{{ shopper_id }}</span></h4>
+                <p class="fs-7 text-muted mb-0">Showing AI recommendations matching your shopping history of <strong class="text-primary">{{ history | length }} products</strong>.</p>
+            </div>
+            <form action="{{ url_for('sign_out') }}" method="POST" class="m-0">
+                <button type="submit" class="btn btn-sm btn-outline-danger px-3 py-2" style="border-radius: 8px;">
+                    <i class="fas fa-sign-out-alt me-1"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hybrid AI Recommendations (SVD + TF-IDF) -->
+    <section class="mb-5">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-magic text-primary me-1"></i> Hybrid AI Recommendations
+            </h2>
+            <span class="badge bg-primary px-2.5 py-1.5 fs-8">SVD + TF-IDF Profile</span>
+        </div>
+        <div class="products-grid">
+            {% for product in hybrid_recs %}
+            <div class="product-item-card">
+                <!-- Similarity score badge -->
+                <div class="card-badge-left bg-primary text-white border-0">Match: {{ product.score }}</div>
+                
+                <!-- Wishlist Heart Button -->
+                <div class="card-badge-wishlist" onclick="toggleWishlist(this, '{{ product.asin }}')">
+                    <i class="far fa-heart"></i>
+                </div>
+
+                <!-- Image -->
+                <div class="product-card-img-container">
+                    <img src="{{ product.imgUrl }}" class="product-card-img" alt="{{ product.title }}"
+                        onerror="this.src='https://via.placeholder.com/150?text=Product+Image'">
+                </div>
+
+                <!-- Category -->
+                <div class="product-card-category">{{ product.category_name }}</div>
+
+                <!-- Title -->
+                <div class="product-card-title" title="{{ product.title }}">
+                    <a href="{{ url_for('recommendations', asin=product.asin) }}"
+                        class="text-decoration-none text-dark-mode-override">{{ product.title }}</a>
+                </div>
+
+                <!-- Rating -->
+                <div class="product-card-rating">
+                    <i class="fas fa-star"></i>
+                    <span class="rating-score">{{ product.stars | default(4.5) }}</span>
+                    <span class="rating-count">({{ (product.reviews | default(250)) | int }} reviews)</span>
+                </div>
+
+                <!-- Price and details -->
+                <div class="product-card-pricing mt-auto mb-2">
+                    <span class="current-price">${{ "{:,.2f}".format(product.price) }}</span>
+                </div>
+
+                <!-- Model details -->
+                <div class="fs-8 text-muted bg-light px-2 py-1.5 rounded-3 text-center w-100">
+                    SVD Pred: <strong class="text-primary">{{ "%.2f" | format(product.predicted_rating | default(4.0)) }} ★</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Deep Graph Recommendations (LightGCN) -->
+    <section class="mb-5">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-share-alt text-success me-1"></i> Deep Graph Recommendations
+            </h2>
+            <span class="badge bg-success px-2.5 py-1.5 fs-8">LightGCN GNN Embeddings</span>
+        </div>
+        <div class="products-grid">
+            {% for product in lightgcn_recs %}
+            <div class="product-item-card">
+                <!-- Similarity score badge -->
+                <div class="card-badge-left bg-success text-white border-0">Affinity: {{ product.score }}</div>
+                
+                <!-- Wishlist Heart Button -->
+                <div class="card-badge-wishlist" onclick="toggleWishlist(this, '{{ product.asin }}')">
+                    <i class="far fa-heart"></i>
+                </div>
+
+                <!-- Image -->
+                <div class="product-card-img-container">
+                    <img src="{{ product.imgUrl }}" class="product-card-img" alt="{{ product.title }}"
+                        onerror="this.src='https://via.placeholder.com/150?text=Product+Image'">
+                </div>
+
+                <!-- Category -->
+                <div class="product-card-category">{{ product.category_name }}</div>
+
+                <!-- Title -->
+                <div class="product-card-title" title="{{ product.title }}">
+                    <a href="{{ url_for('recommendations', asin=product.asin) }}"
+                        class="text-decoration-none text-dark-mode-override">{{ product.title }}</a>
+                </div>
+
+                <!-- Rating -->
+                <div class="product-card-rating">
+                    <i class="fas fa-star"></i>
+                    <span class="rating-score">{{ product.stars | default(4.5) }}</span>
+                    <span class="rating-count">({{ (product.reviews | default(250)) | int }} reviews)</span>
+                </div>
+
+                <!-- Price and details -->
+                <div class="product-card-pricing mt-auto mb-2">
+                    <span class="current-price">${{ "{:,.2f}".format(product.price) }}</span>
+                </div>
+                
+                <!-- Model details -->
+                <div class="fs-8 text-muted bg-light px-2 py-1.5 rounded-3 text-center w-100">
+                    SVD Pred: <strong class="text-success">{{ "%.2f" | format(product.predicted_rating | default(4.0)) }} ★</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Shopper Purchase & Rating History -->
+    <section class="mb-5">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-history text-secondary me-1"></i> Your Ratings History
+            </h2>
+            <span class="badge bg-secondary px-2.5 py-1.5 fs-8">Demo Shopper Profile</span>
+        </div>
+        <div class="products-grid">
+            {% for item in history %}
+            <div class="product-item-card">
+                <!-- User rating badge -->
+                <div class="card-badge-left bg-warning text-dark border-0">Rated: {{ item.rating | int }} ★</div>
+
+                <!-- Image -->
+                <div class="product-card-img-container">
+                    <img src="https://via.placeholder.com/150?text=Product+Image" class="product-card-img" alt="{{ item.title }}">
+                </div>
+
+                <!-- Category -->
+                <div class="product-card-category">{{ item.category_name }}</div>
+
+                <!-- Title -->
+                <div class="product-card-title" title="{{ item.title }}">
+                    <a href="{{ url_for('recommendations', asin=item.asin) }}"
+                        class="text-decoration-none text-dark-mode-override">{{ item.title }}</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% else %}
+    <!-- Login CTA Callout -->
+    <div class="dashboard-card mb-5 text-center py-5" style="background: linear-gradient(135deg, rgba(108, 76, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%); border: 1px dashed rgba(108, 76, 241, 0.25);">
+        <i class="fas fa-user-circle fa-3x text-primary mb-3"></i>
+        <h4 class="fw-bold text-dark-mode-override">Unlock Personalized AI Recommendations</h4>
+        <p class="fs-7 text-muted mx-auto mb-4" style="max-width: 500px;">
+            Log in as one of our 531 demo shoppers to see tailored SVD predictions, TF-IDF content profiles, and LightGCN Graph Collaborative Filtering recommendations in real-time.
+        </p>
+        <a href="{{ url_for('login') }}" class="btn-primary-rect px-4 py-2.5 d-inline-flex align-items-center gap-2">
+            <i class="fas fa-sign-in-alt"></i> Access Shopper Portal
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Trending & Best Sellers Section -->
+    <section class="mb-5">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-fire text-danger me-1"></i> Trending & Best Sellers
+            </h2>
+            <a href="{{ url_for('search') }}" class="section-link">View All Catalog <i
+                    class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="products-grid">
+            {% for product in trending %}
+            <div class="product-item-card">
+                <!-- Discount badge -->
+                {% set discount = product.discount_percent | default(15) | int %}
+                {% if discount > 0 %}
+                <div class="card-badge-left">{{ discount }}% OFF</div>
+                {% endif %}
+
+                <!-- Wishlist Heart Button -->
+                <div class="card-badge-wishlist" onclick="toggleWishlist(this, '{{ product.asin }}')">
+                    <i class="far fa-heart"></i>
+                </div>
+
+                <!-- Image -->
+                <div class="product-card-img-container">
+                    <img src="{{ product.imgUrl }}" class="product-card-img" alt="{{ product.title }}"
+                        onerror="this.src='https://via.placeholder.com/150?text=Product+Image'">
+                </div>
+
+                <!-- Category -->
+                <div class="product-card-category">{{ product.category_name }}</div>
+
+                <!-- Title -->
+                <div class="product-card-title" title="{{ product.title }}">
+                    <a href="{{ url_for('recommendations', asin=product.asin) }}"
+                        class="text-decoration-none text-dark-mode-override">{{ product.title }}</a>
+                </div>
+
+                <!-- Rating -->
+                <div class="product-card-rating">
+                    <i class="fas fa-star"></i>
+                    <span class="rating-score">{{ product.stars | default(4.5) }}</span>
+                    <span class="rating-count">({{ (product.reviews | default(2500)) | int }} reviews)</span>
+                </div>
+
+                <!-- Price and details -->
+                <div class="product-card-pricing">
+                    <span class="current-price">${{ "{:,.2f}".format(product.price) }}</span>
+                    {% if product.listPrice and product.listPrice > product.price %}
+                    <span class="original-price">${{ "{:,.2f}".format(product.listPrice) }}</span>
+                    {% else %}
+                    {% set list_price = product.price / (1 - (discount / 100)) %}
+                    <span class="original-price">${{ "{:,.2f}".format(list_price) }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+
+</div>
+
+<script>
+    function toggleWishlist(element, asin) {
+        const icon = element.querySelector('i');
+        if (icon.classList.contains('far')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            icon.style.color = '#EF4444';
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+            icon.style.color = '';
+        }
+    }
+</script>
+{% endblock %}

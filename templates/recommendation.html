@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartReco - Recommendation Results{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Selected Product & Hybrid Parameter control -->
+    <div class="row g-4 mb-4">
+        <!-- Target Product Card -->
+        <div class="col-lg-12">
+            <div class="dashboard-card d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-secondary px-2.5 py-1.5 fs-8">Selected Target Product</span>
+                        <a href="{{ url_for('search') }}" class="btn btn-sm btn-outline-secondary fs-8 px-2 py-1.5" style="border-radius: 8px;">
+                            <i class="fas fa-arrow-left me-1"></i> Back to Catalog
+                        </a>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-4 flex-column flex-md-row">
+                        <!-- Image -->
+                        <div class="product-img-wrapper m-0 border bg-white" style="width: 140px; height: 140px; flex-shrink: 0; border-radius: 12px;">
+                            <img src="{{ product.imgUrl }}" class="product-img" alt="{{ product.title }}" onerror="this.src='https://via.placeholder.com/150?text=Product+Image'">
+                        </div>
+                        
+                        <!-- Details -->
+                        <div class="text-start flex-grow-1">
+                            <div class="text-uppercase text-muted fs-8 fw-semibold mb-1">{{ product.category_name }}</div>
+                            <h5 class="fw-bold mb-2 text-dark-mode-override" style="font-size: 16px; line-height: 1.4;">{{ product.title }}</h5>
+                            <div class="product-card-rating mb-2" style="font-size: 13px;">
+                                <i class="fas fa-star"></i>
+                                <span class="rating-score">{{ product.stars | default(4.0) }}</span>
+                                <span class="rating-count">({{ product.reviews | default(0) }} ratings)</span>
+                            </div>
+                            <div class="d-flex align-items-center flex-wrap gap-3">
+                                <div class="fs-4 fw-bold text-primary">${{ "{:,.2f}".format(product.price) }}</div>
+                                {% if product.popularity_score %}
+                                <div class="fs-8 text-muted bg-light px-2.5 py-1 rounded-3">Popularity Score: <strong>{{ "%.2f" | format(product.popularity_score) }}</strong></div>
+                                {% endif %}
+                                {% if my_rating %}
+                                <div class="fs-8 text-white bg-success px-2.5 py-1 rounded-3">
+                                    SVD Predicted Rating for You: <strong>{{ my_rating }} ★</strong>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Grid Card -->
+    <div class="row">
+        <div class="col-12">
+            <div class="dashboard-card border-0 bg-transparent p-0">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-bold m-0 text-dark-mode-override">Top 12 Similar Recommendations</h4>
+                    <span class="badge bg-success px-3 py-2 fs-8">TF-IDF Content-Based Model</span>
+                </div>
+                
+                <div class="products-grid">
+                    {% for rec in recommendations %}
+                    <div class="product-item-card">
+                        <!-- Match score badge -->
+                        <div class="card-badge-left bg-success text-white border-0" style="box-shadow: 0 4px 8px rgba(16, 185, 129, 0.2);">Match: {{ rec.score }}</div>
+                        
+                        <!-- Wishlist Heart Button -->
+                        <div class="card-badge-wishlist" onclick="toggleWishlist(this, '{{ rec.asin }}')">
+                            <i class="far fa-heart"></i>
+                        </div>
+                        
+                        <!-- Image -->
+                        <div class="product-card-img-container">
+                            <img src="{{ rec.imgUrl }}" class="product-card-img" alt="{{ rec.title }}" onerror="this.src='https://via.placeholder.com/150?text=Product'">
+                        </div>
+                        
+                        <!-- Category -->
+                        <div class="product-card-category text-truncate" title="{{ rec.category_name }}">{{ rec.category_name }}</div>
+                        
+                        <!-- Title -->
+                        <div class="product-card-title" title="{{ rec.title }}">
+                            <a href="{{ url_for('recommendations', asin=rec.asin, alpha=alpha) }}" class="text-decoration-none text-dark-mode-override">{{ rec.title }}</a>
+                        </div>
+                        
+                        <!-- Rating -->
+                        <div class="product-card-rating">
+                            <i class="fas fa-star"></i>
+                            <span class="rating-score">{{ rec.stars | default(4.0) }}</span>
+                            <span class="rating-count">({{ (rec.reviews | default(50)) | int }} reviews)</span>
+                        </div>
+                        
+                        <!-- Pricing -->
+                        <div class="product-card-pricing mt-auto mb-2">
+                            <span class="current-price">${{ "{:,.2f}".format(rec.price) }}</span>
+                            {% if rec.listPrice and rec.listPrice > rec.price %}
+                                <span class="original-price">${{ "{:,.2f}".format(rec.listPrice) }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- CF prediction score -->
+                        {% if rec.predicted_rating %}
+                        <div class="fs-8 text-muted bg-light px-2 py-1.5 rounded-3 text-center w-100 mb-2">
+                            SVD Pred: <strong class="text-primary">{{ "%.2f" | format(rec.predicted_rating) }} ★</strong>
+                        </div>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('recommendations', asin=rec.asin, alpha=alpha) }}" class="btn-primary-rect w-100 py-2.5 d-flex justify-content-center align-items-center fs-8">
+                            Get Recommendations
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleWishlist(element, asin) {
+    const icon = element.querySelector('i');
+    if (icon.classList.contains('far')) {
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+        icon.style.color = '#EF4444';
+    } else {
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+        icon.style.color = '';
+    }
+}
+</script>
+{% endblock %}

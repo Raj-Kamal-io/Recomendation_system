@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartReco - Access Portal</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom Style Sheet -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+
+<body class="login-body">
+    <div class="login-split-container">
+        <!-- Left: Branding & Promo Panel -->
+        <div class="login-promo-panel">
+            <div class="promo-header">
+                <div class="logo-icon-container">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="promo-title-group">
+                    <span class="promo-brand-name">SmartReco</span>
+                    <span class="promo-brand-sub">Smart Recommendations</span>
+                </div>
+            </div>
+
+            <div class="promo-content text-start">
+                <h1 class="promo-headline">Discover products<br>you'll love.</h1>
+                <p class="promo-desc">
+                    Personalized recommendations just for you.<br>
+                    SmartReco uses hybrid recommendation techniques to analyze user preferences and suggest products
+                    you'll love.
+                </p>
+
+                <!-- Graphic Illustration -->
+                <div class="promo-visual-wrapper">
+                    <img src="{{ url_for('static', filename='img/login_mockup2_transparent.png') }}" class="promo-img"
+                        alt="Branding visual">
+                </div>
+
+            </div>
+
+            <div class="promo-footer">
+                <span>SmartReco &bull; 2026</span>
+            </div>
+        </div>
+
+        <!-- Right: Elegant Login / Register Form Panel -->
+        <div class="login-form-panel">
+
+            <!-- LOGIN VIEW -->
+            <div id="login-view-container" class="fade-in">
+                <div class="form-header-group">
+                    <h2 class="form-welcome-title">Welcome Back!</h2>
+                    <p class="form-welcome-sub">Login to your account</p>
+                </div>
+
+                <form action="{{ url_for('login') }}" method="POST">
+                    <!-- Email / User ID -->
+                    <div class="mb-3">
+                        <label for="login-email" class="custom-form-label">Email Address / User ID</label>
+                        <div class="custom-input-wrapper">
+                            <i class="far fa-envelope input-icon-left"></i>
+                            <input type="text" name="user_id" id="login-email" class="custom-form-input"
+                                placeholder="Enter your email or test ID..." value="A127GZ51PD786F" required>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="login-pass" class="custom-form-label">Password</label>
+                        <div class="custom-input-wrapper">
+                            <i class="fas fa-lock input-icon-left"></i>
+                            <input type="password" name="password" id="login-pass" class="custom-form-input"
+                                placeholder="Enter your password..." value="password123" required>
+                            <i class="far fa-eye input-icon-right"
+                                onclick="togglePassVisibility('login-pass', this)"></i>
+                        </div>
+                    </div>
+
+                    <!-- Form Options -->
+                    <div class="d-flex justify-content-between align-items-center mb-4 fs-8">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe" checked>
+                            <label class="form-check-label text-muted" for="rememberMe">Remember me</label>
+                        </div>
+                        <a href="#" class="text-decoration-none" style="font-weight: 600;">Forgot Password?</a>
+                    </div>
+
+                    <!-- Submit button -->
+                    <button type="submit"
+                        class="btn-primary-rect w-100 py-3 d-flex justify-content-center align-items-center">
+                        <i class="fas fa-sign-in-alt me-2"></i> Login
+                    </button>
+                </form>
+
+                <!-- Demo User Quick Access Panel -->
+                <div class="mt-3 text-start bg-light p-3 rounded-3 border" style="font-size: 13px;">
+                    <strong class="text-primary d-block mb-1.5"><i class="fas fa-magic me-1"></i> Active Demo Shopper IDs:</strong>
+                    <div class="d-flex flex-wrap gap-1.5" style="max-height: 90px; overflow-y: auto; padding: 2px;">
+                        {% for uid in demo_users[:15] %}
+                        <span class="badge bg-secondary cursor-pointer hover-shadow" style="cursor: pointer; font-size: 11px;" onclick="document.getElementById('login-email').value='{{ uid }}'">{{ uid }}</span>
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted d-block mt-2">Click any ID above to copy it to the form input.</small>
+                </div>
+
+                <div class="separator-text">or continue with</div>
+
+                <!-- Social accounts -->
+                <div class="social-buttons-row">
+                    <button class="btn-social-auth" onclick="window.location.href=`{{ url_for('dashboard') }}`">
+                        <i class="fab fa-google text-danger fs-6"></i> Google
+                    </button>
+                    <button class="btn-social-auth" onclick="window.location.href=`{{ url_for('dashboard') }}`">
+                        <i class="fab fa-github text-dark fs-6"></i> GitHub
+                    </button>
+                </div>
+
+                <div class="form-toggle-link text-center">
+                    Don't have an account? <a href="#" onclick="showSignUp()">Sign up</a>
+                </div>
+            </div>
+
+            <!-- SIGN UP VIEW (DUMMY FUNCTIONAL TABS) -->
+            <div id="signup-view-container" class="fade-in" style="display: none;">
+                <div class="form-header-group">
+                    <h2 class="form-welcome-title">Create Account </h2>
+                    <p class="form-welcome-sub">Sign up to get started</p>
+                </div>
+
+                <form onsubmit="event.preventDefault(); showLogin();">
+                    <!-- Full Name -->
+                    <div class="mb-3">
+                        <label for="reg-name" class="custom-form-label">Full Name</label>
+                        <div class="custom-input-wrapper">
+                            <i class="far fa-user input-icon-left"></i>
+                            <input type="text" id="reg-name" class="custom-form-input"
+                                placeholder="Enter your full name..." required>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="reg-email" class="custom-form-label">Email Address</label>
+                        <div class="custom-input-wrapper">
+                            <i class="far fa-envelope input-icon-left"></i>
+                            <input type="email" id="reg-email" class="custom-form-input"
+                                placeholder="Enter your email..." required>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="reg-pass" class="custom-form-label">Password</label>
+                        <div class="custom-input-wrapper">
+                            <i class="fas fa-lock input-icon-left"></i>
+                            <input type="password" id="reg-pass" class="custom-form-input"
+                                placeholder="Create a password..." required>
+                            <i class="far fa-eye input-icon-right" onclick="togglePassVisibility('reg-pass', this)"></i>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="mb-3">
+                        <label for="reg-confirm" class="custom-form-label">Confirm Password</label>
+                        <div class="custom-input-wrapper">
+                            <i class="fas fa-lock input-icon-left"></i>
+                            <input type="password" id="reg-confirm" class="custom-form-input"
+                                placeholder="Confirm your password..." required>
+                            <i class="far fa-eye input-icon-right"
+                                onclick="togglePassVisibility('reg-confirm', this)"></i>
+                        </div>
+                    </div>
+
+                    <!-- Form Options -->
+                    <div class="form-check mb-4 fs-8">
+                        <input class="form-check-input" type="checkbox" id="termsAgree" required>
+                        <label class="form-check-label text-muted" for="termsAgree">
+                            I agree to the <a href="#" class="text-decoration-none">Terms & Conditions</a>
+                        </label>
+                    </div>
+
+                    <!-- Submit button -->
+                    <button type="submit"
+                        class="btn-primary-rect w-100 py-3 d-flex justify-content-center align-items-center">
+                        <i class="fas fa-user-plus me-2"></i> Sign Up
+                    </button>
+                </form>
+
+                <div class="separator-text">or continue with</div>
+
+                <!-- Social accounts -->
+                <div class="social-buttons-row">
+                    <button class="btn-social-auth" onclick="window.location.href=`{{ url_for('dashboard') }}`">
+                        <i class="fab fa-google text-danger fs-6"></i> Google
+                    </button>
+                    <button class="btn-social-auth" onclick="window.location.href=`{{ url_for('dashboard') }}`">
+                        <i class="fab fa-github text-dark fs-6"></i> GitHub
+                    </button>
+                </div>
+
+                <div class="form-toggle-link text-center">
+                    Already have an account? <a href="#" onclick="showLogin()">Login</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toggle scripts -->
+    <script>
+        function showSignUp() {
+            document.getElementById('login-view-container').style.display = 'none';
+            document.getElementById('signup-view-container').style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('signup-view-container').style.display = 'none';
+            document.getElementById('login-view-container').style.display = 'block';
+        }
+
+        function togglePassVisibility(inputId, iconElement) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                iconElement.classList.remove('far', 'fa-eye');
+                iconElement.classList.add('fas', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                iconElement.classList.remove('fas', 'fa-eye-slash');
+                iconElement.classList.add('far', 'fa-eye');
+            }
+        }
+    </script>
+</body>
+
+</html>

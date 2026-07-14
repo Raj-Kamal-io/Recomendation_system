@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartReco - Smart Recommendations{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom Style Sheet -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <header class="top-nav">
+            <!-- Left: Logo -->
+            <a href="{{ url_for('dashboard') }}" class="top-nav-logo text-decoration-none">
+                <div class="logo-icon-container">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="logo-text-wrapper">
+                    <span class="logo-title">SmartReco</span>
+                    <span class="logo-subtitle">Smart Recommendations</span>
+                </div>
+            </a>
+
+            <!-- Middle: Global Search Bar -->
+            <form action="{{ url_for('search') }}" method="GET" class="nav-search-form d-none d-lg-block">
+                <div class="search-input-group">
+                    <button type="submit" style="background: none; border: none; padding: 0; outline: none; display: flex; align-items: center; cursor: pointer;">
+                        <i class="fas fa-search" style="margin-right: 8px;"></i>
+                    </button>
+                    <input type="text" name="q" id="nav-search-input"
+                        placeholder="Search for products, brands and more..." value="{{ query or '' }}"
+                        autocomplete="off">
+                </div>
+            </form>
+
+            <!-- Right Menu Tabs -->
+            <ul class="nav-menu-links d-none d-md-flex">
+                <li class="nav-link-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <a href="{{ url_for('dashboard') }}" class="text-decoration-none">
+                        <i class="fas fa-home"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li class="nav-link-item {% if request.endpoint == 'search' %}active{% endif %}">
+                    <a href="{{ url_for('search') }}" class="text-decoration-none">
+                        <i class="fas fa-th-large"></i>
+                        <span>Categories</span>
+                    </a>
+                </li>
+                <li class="nav-link-item {% if request.endpoint == 'comparison' %}active{% endif %}">
+                    <a href="{{ url_for('comparison') }}" class="text-decoration-none">
+                        <i class="fas fa-balance-scale"></i>
+                        <span>Compare Models</span>
+                    </a>
+                </li>
+
+            </ul>
+
+            <!-- Profile Dropdown & Theme Actions -->
+            <div class="top-nav-actions">
+                <!-- Theme Toggle -->
+                <button class="icon-btn-badge" id="theme-toggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+
+                <!-- Dummy wishlist badge -->
+                <button class="icon-btn-badge d-none d-sm-block" title="Wishlist">
+                    <i class="far fa-heart"></i>
+                </button>
+
+                <!-- Dummy cart badge -->
+                <button class="icon-btn-badge" title="Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="badge-count">2</span>
+                </button>
+
+                <!-- Profile Dropdown -->
+                <div class="profile-menu-container">
+                    <div class="profile-avatar">
+                        {% if session.get('user_id') %}
+                        {{ session.get('user_id')[:2] | upper }}
+                        {% else %}
+                        RK
+                        {% endif %}
+                    </div>
+                    <div class="profile-info d-none d-md-flex">
+                        <span class="profile-name">
+                            {% if session.get('user_id') == 'AKM1MP6P0OYPR' or not session.get('user_id') %}
+                            Raj Kamal
+                            {% else %}
+                            {{ session.get('user_id') }}
+                            {% endif %}
+                        </span>
+                        <span class="profile-role">Active User</span>
+                    </div>
+                    <a href="{{ url_for('login') }}" class="profile-logout-btn" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Viewport -->
+        <main class="main-viewport">
+            <!-- Content Area -->
+            <div class="content-body">
+                {% block content %}{% endblock %}
+            </div>
+
+            <!-- Global Footer -->
+            <footer class="app-footer text-start">
+                <div class="footer-grid">
+                    <!-- Column 1: Brand -->
+                    <div class="footer-col">
+                        <div class="footer-brand text-decoration-none">
+                            <div class="footer-brand-logo">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <span class="footer-brand-title">SmartReco</span>
+                        </div>
+                        <p class="footer-desc mt-2">
+                            Hybrid recommendation system designed to provide personalized item catalog matching.
+                            Seamlessly combines TF-IDF similarities and Collaborative Filtering SVD factorizations.
+                        </p>
+                    </div>
+
+                    <!-- Column 2: Platform Links -->
+                    <div class="footer-col">
+                        <h6 class="footer-col-title">Platform</h6>
+                        <ul class="footer-links">
+                            <li class="footer-link-item"><a href="{{ url_for('dashboard') }}"><i
+                                        class="fas fa-home me-2"></i>Home Portal</a></li>
+                            <li class="footer-link-item"><a href="{{ url_for('search') }}"><i
+                                        class="fas fa-th-large me-2"></i>Product Catalog</a></li>
+                            <li class="footer-link-item"><a href="{{ url_for('comparison') }}"><i
+                                        class="fas fa-balance-scale me-2"></i>Model Benchmarks</a></li>
+
+                        </ul>
+                    </div>
+
+                    <!-- Column 3: Algorithms -->
+                    <div class="footer-col">
+                        <h6 class="footer-col-title">Machine Learning</h6>
+                        <ul class="footer-links">
+                            <li class="footer-link-item"><a href="#"><i class="fas fa-brain me-2"></i>SVD Matrix
+                                    Factorization</a></li>
+                            <li class="footer-link-item"><a href="#"><i class="fas fa-file-alt me-2"></i>TF-IDF Text
+                                    Vectors</a></li>
+                            <li class="footer-link-item"><a href="#"><i class="fas fa-calculator me-2"></i>Hybrid
+                                    Combined Weighting</a></li>
+                            <li class="footer-link-item"><a href="#"><i class="fas fa-tachometer-alt me-2"></i>RMSE &
+                                    MAE Evaluators</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-bottom">
+                    <span class="footer-copyright">&copy; 2026 SmartReco. All rights reserved.</span>
+                    <div class="footer-socials">
+                        <a href="#" class="social-icon-btn"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-icon-btn"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-icon-btn"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Scripts -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

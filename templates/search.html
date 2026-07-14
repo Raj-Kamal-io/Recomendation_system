@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block title %}SmartReco - Search Products{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Search Inputs Card -->
+    <div class="dashboard-card mb-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="logo-icon-container" style="width: 32px; height: 32px; font-size: 14px;">
+                <i class="fas fa-search"></i>
+            </div>
+            <h4 class="fw-bold m-0 text-dark-mode-override">Product Catalog Search</h4>
+        </div>
+        <p class="fs-7 text-muted">Search through thousands of preprocessed Amazon products. Select any item to generate
+            hybrid collaborative-content recommendations.</p>
+
+        <form action="{{ url_for('search') }}" method="GET" class="position-relative">
+
+            <div class="input-group border rounded-3 overflow-hidden">
+                <span class="input-group-text bg-white border-0 text-muted"><i class="fas fa-search"></i></span>
+                <input type="text" name="q" id="catalog-search-input" class="form-control border-0 py-3 fs-7"
+                    placeholder="Search products (e.g. laptop, phone, watch, bag...)" value="{{ query or '' }}"
+                    autocomplete="off">
+                <button type="submit" class="btn text-white px-4 border-0"
+                    style="background: var(--primary-gradient); font-weight: 600;">Search</button>
+            </div>
+        </form>
+
+        <!-- Popular queries chips -->
+
+    </div>
+
+    <!-- Search status info -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold m-0 text-dark-mode-override" style="font-size: 16px;">
+            {% if query or category %}
+            Search Results for: <span class="text-primary">"{{ query or category }}"</span> <span
+                class="text-muted fw-normal">({{ total_items }} items found)</span>
+            {% else %}
+            Browse Catalog <span class="text-muted fw-normal">({{ total_items }} products available)</span>
+            {% endif %}
+        </h5>
+        {% if query or category %}
+        <a href="{{ url_for('search') }}" class="btn btn-sm btn-outline-secondary fs-8 px-3 py-1.5"
+            style="border-radius: 8px;">Clear Filters</a>
+        {% endif %}
+    </div>
+
+    <!-- Products Grid -->
+    {% if products %}
+    <div class="products-grid">
+        {% for p in products %}
+        <div class="product-item-card">
+            <!-- Discount Badge -->
+            {% set discount = p.discount_percent | default(0) | int %}
+            {% if discount > 0 %}
+            <div class="card-badge-left">{{ discount }}% OFF</div>
+            {% endif %}
+
+            <!-- Wishlist Heart Button -->
+            <div class="card-badge-wishlist" onclick="toggleWishlist(this, '{{ p.asin }}')">
+                <i class="far fa-heart"></i>
+            </div>
+
+            <!-- Image -->
+            <div class="product-card-img-container">
+                <img src="{{ p.imgUrl }}" class="product-card-img" alt="{{ p.title }}"
+                    onerror="this.src='https://via.placeholder.com/150?text=Product+Image'">
+            </div>
+
+            <!-- Category -->
+            <div class="product-card-category text-truncate" title="{{ p.category_name }}">{{ p.category_name }}</div>
+
+            <!-- Title -->
+            <div class="product-card-title" title="{{ p.title }}">
+                <a href="{{ url_for('recommendations', asin=p.asin) }}"
+                    class="text-decoration-none text-dark-mode-override">{{ p.title }}</a>
+            </div>
+
+            <!-- Rating -->
+            <div class="product-card-rating">
+                <i class="fas fa-star"></i>
+                <span class="rating-score">{{ p.stars | default(4.0) }}</span>
+                <span class="rating-count">({{ (p.reviews | default(120)) | int }} reviews)</span>
+            </div>
+
+            <!-- Pricing & Action Button -->
+            <div class="product-card-pricing mt-auto mb-3">
+                <span class="current-price">${{ "{:,.2f}".format(p.price) }}</span>
+                {% if p.listPrice and p.listPrice > p.price %}
+                <span class="original-price">${{ "{:,.2f}".format(p.listPrice) }}</span>
+                {% elif discount > 0 %}
+                {% set list_price = p.price / (1 - (discount / 100)) %}
+                <span class="original-price">${{ "{:,.2f}".format(list_price) }}</span>
+                {% endif %}
+            </div>
+
+            <a href="{{ url_for('recommendations', asin=p.asin) }}"
+                class="btn-primary-rect w-100 py-2.5 d-flex justify-content-center align-items-center fs-8">
+                Get Recommendations
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav class="mt-5 d-flex justify-content-center">
+        <ul class="pagination gap-1">
+            <!-- Prev -->
+            <li class="page-item {% if current_page == 1 %}disabled{% endif %}">
+                <a class="page-link border-0 rounded-3 text-secondary"
+                    href="{{ url_for('search', q=query, category=category, page=current_page-1) }}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+
+            <!-- Dynamic pages range -->
+            {% set start_page = current_page - 2 if current_page - 2 > 0 else 1 %}
+            {% set end_page = start_page + 4 if start_page + 4 <= total_pages else total_pages %} {% for page_num in
+                range(start_page, end_page + 1) %} <li
+                class="page-item {% if page_num == current_page %}active{% endif %}">
+                <a class="page-link border-0 rounded-3 {% if page_num == current_page %}bg-primary text-white{% else %}text-secondary{% endif %}"
+                    href="{{ url_for('search', q=query, category=category, page=page_num) }}">
+                    {{ page_num }}
+                </a>
+                </li>
+                {% endfor %}
+
+                <!-- Next -->
+                <li class="page-item {% if current_page == total_pages %}disabled{% endif %}">
+                    <a class="page-link border-0 rounded-3 text-secondary"
+                        href="{{ url_for('search', q=query, category=category, page=current_page+1) }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="dashboard-card p-5 text-center text-muted">
+        <i class="fas fa-info-circle fa-3x mb-3 text-secondary text-opacity-30"></i>
+        <h5>No products match your search query.</h5>
+        <p class="fs-8">Try searching for other popular keywords like "Laptop", "Cable", "Samsung", or reset active
+            filters.</p>
+        <a href="{{ url_for('search') }}" class="btn-primary-rect px-4 mt-3" style="box-shadow: none;">Reset Filters</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleWishlist(element, asin) {
+        const icon = element.querySelector('i');
+        if (icon.classList.contains('far')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            icon.style.color = '#EF4444';
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+            icon.style.color = '';
+        }
+    }
+</script>
+{% endblock %}
